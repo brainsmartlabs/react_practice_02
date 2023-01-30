@@ -65,7 +65,7 @@ export class News extends Component {
 
         return (
             <>
-                <h2 className='text-center' style={{ margin: '40px 0px' }}>News Monkey - Top Headlines</h2>
+                <h2 className='text-center' style={{ margin: '90px 0px 40px 0px' }}>News Monkey - Top Headlines</h2>
                 {this.state.loading && <Spinner />}
                 {(!this.state.loading) &&
                     <InfiniteScroll
