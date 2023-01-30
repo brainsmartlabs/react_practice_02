@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import NewsItem from '../newsItem/NewsItem'
 import PropTypes from 'prop-types'
+import Spinner from '../spinner/Spinner';
+import InfiniteScroll from "react-infinite-scroll-component";
 
 export class News extends Component {
 
@@ -23,8 +25,8 @@ export class News extends Component {
             page: 1,
             totalArticles: 0
         };
-        this.handleNextClick = this.handleNextClick.bind(this);
-        this.handlePreviousClick = this.handlePreviousClick.bind(this);
+
+        document.title = `${this.props.category} - NewsMonkey`
     }
 
     async updateNews(pageNo) {
@@ -38,52 +40,62 @@ export class News extends Component {
         });
     }
 
-    async componentDidMount() {
+    componentDidMount() {
         this.updateNews(1);
     }
 
-
-    async handlePreviousClick() {
-
-        this.updateNews(this.state.page - 1);
+    fetchMoreData = async () => {
+        let res = await fetch(`https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=202c614376af4b86b49c2823e2631480&page=${this.state.page + 1}&pageSize=${this.props.pageSize}`);
+        let data = await res.json();
+        this.setState({
+            articles: this.state.articles.concat(data.articles),
+            loading: false,
+            page: this.state.page + 1,
+            totalArticles: data.totalResults
+        });
     }
 
-    async handleNextClick() {
-
-        this.updateNews(this.state.page + 1);
-    }
 
     render() {
 
         return (
-            <div className='container my-3'>
+            <>
                 <h2 className='text-center' style={{ margin: '40px 0px' }}>News Monkey - Top Headlines</h2>
-                <div className="row">
-                    {
-                        (!this.state.loading) ? this.state.articles.map((item, index) => {
-                            return (
-                                <div className="col-md-4" key={index}>
-                                    <NewsItem
-                                        title={item.title.slice(0, 45)}
-                                        decription={(item.description) ? item.description.slice(0, 88) : "Click for more Details"}
-                                        imageURL={(item.urlToImage != null) ? item.urlToImage : "https://theleaflet.in/wp-content/uploads/2021/09/IT-Dept.jpg"}
-                                        newsURL={item.url}
-                                        author={item.author}
-                                        date={item.publishedAt}
-                                        source={item.source.name}
-                                    />
-                                </div>
-                            )
-                        }) : <h2>Loading...!!</h2>
-                    }
-                </div>
-                <br />
-                <div className="container d-flex justify-content-between">
-                    <button disabled={this.state.page <= 1} type="button" className="btn btn-dark" onClick={this.handlePreviousClick}>&larr; Previous</button>
-                    <button disabled={this.state.page >= (Math.ceil(this.state.totalArticles / this.props.pageSize))} type="button" className="btn btn-dark" onClick={this.handleNextClick}>Next &rarr;</button>
-                </div>
+                {this.state.loading && <Spinner />}
+                {(!this.state.loading) &&
+                    <InfiniteScroll
+                        dataLength={this.state.articles.length}
+                        next={this.fetchMoreData}
+                        hasMore={this.state.articles.length != this.state.totalArticles}
+                        loader={<Spinner />}
+                    >
+                        <div className='container'>
+                            <div className="row">
+                                {
+                                    this.state.articles.map((item, index) => {
+                                        return (
+                                            <div className="col-md-4" key={index}>
+                                                <NewsItem
+                                                    title={item.title.slice(0, 45)}
+                                                    decription={(item.description) ? item.description.slice(0, 88) : "Click for more Details"}
+                                                    imageURL={(item.urlToImage != null) ? item.urlToImage : "https://theleaflet.in/wp-content/uploads/2021/09/IT-Dept.jpg"}
+                                                    newsURL={item.url}
+                                                    author={item.author}
+                                                    date={item.publishedAt}
+                                                    source={item.source.name}
+                                                />
+                                            </div>
+                                        )
+                                    })
+                                }
+                            </div>
+                        </div>
+                    </InfiniteScroll>
+                }
 
-            </div>
+
+
+            </>
         )
     }
 }

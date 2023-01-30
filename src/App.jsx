@@ -3,6 +3,7 @@ import './App.css';
 import Navbar from './navbar/Navbar';
 import News from './news/News';
 import { Routes, Route } from 'react-router-dom';
+import { ClipLoader } from 'react-spinners';
 
 
 class App extends Component {
