@@ -27,42 +27,30 @@ export class News extends Component {
         this.handlePreviousClick = this.handlePreviousClick.bind(this);
     }
 
-
-    async componentDidMount() {
-        let res = await fetch(`https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=202c614376af4b86b49c2823e2631480&page=1&pageSize=${this.props.pageSize}`);
+    async updateNews(pageNo) {
+        let res = await fetch(`https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=202c614376af4b86b49c2823e2631480&page=${pageNo}&pageSize=${this.props.pageSize}`);
         let data = await res.json();
         this.setState({
             articles: data.articles,
             loading: false,
-            page: 1,
+            page: pageNo,
             totalArticles: data.totalResults
         });
+    }
+
+    async componentDidMount() {
+        this.updateNews(1);
     }
 
 
     async handlePreviousClick() {
-        console.log("Prev Click");
-        let res = await fetch(`https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=202c614376af4b86b49c2823e2631480&page=${this.state.page - 1}&pageSize=${this.props.pageSize}`);
-        let data = await res.json();
-        this.setState({
-            articles: data.articles,
-            loading: false,
-            page: this.state.page - 1,
-            totalArticles: data.totalResults
-        });
+
+        this.updateNews(this.state.page - 1);
     }
 
     async handleNextClick() {
-        console.log("Next Click");
-        let res = await fetch(`https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=202c614376af4b86b49c2823e2631480&page=${this.state.page + 1}&pageSize=${this.props.pageSize}`);
-        let data = await res.json();
-        this.setState({
-            articles: data.articles,
-            loading: false,
-            page: this.state.page + 1,
-            totalArticles: data.totalResults
-        });
 
+        this.updateNews(this.state.page + 1);
     }
 
     render() {
